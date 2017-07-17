@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/processdef">
+  <process id="hospitalBookingProcess" isExecutable="true">
+    <startEvent id="sid-1B0E1427-2B55-44FB-AFF1-9ACCC9719477"></startEvent>
+    <userTask id="sid-E80531C6-EB8A-400B-AA00-C91E3A1D39BD" name="Nurse Consultation" activiti:candidateGroups="nurses">
+      <extensionElements>
+        <activiti:formProperty id="patientLastName" name="Last Name" type="string" expression="${patientLastName}" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="patientEmail" name="Email" type="string" expression="${patientEmail}" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="patientCellNumber" name="Cell Number" type="string" expression="${patientCellNumber}" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="bookingDate" name="Booking Date" type="date" expression="${bookingDate}" datePattern="MM-dd-yyyy hh:mm" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="bookingReason" name="Booking Reason" type="string" expression="${bookingReason}" writable="false"></activiti:formProperty>
+        <activiti:formProperty id="nurseDecision" name="Nurse Decision" type="string" required="true">
+          <activiti:value id="referToDoctor" name="Refer to doctor"></activiti:value>
+          <activiti:value id="referToPharmacy" name="Refer to pharmacy"></activiti:value>
+          <activiti:value id="completed" name="Completed"></activiti:value>
+        </activiti:formProperty>
+        <activiti:formProperty id="nurseComments" name="Nurse Comments" type="string" required="true"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="sid-C5F17919-58CB-483C-B6C0-3A5B37109E55" sourceRef="inclusivegateway1" targetRef="sid-C909F7B9-190A-4A68-949F-EA11481CD621"></sequenceFlow>
+    <serviceTask id="sid-C909F7B9-190A-4A68-949F-EA11481CD621" name="Booking Confirmation" activiti:type="mail">
+      <extensionElements>
+        <activiti:field name="to">
+          <activiti:expression><![CDATA[${booking.email}]]></activiti:expression>
+        </activiti:field>
+        <activiti:field name="subject">
+          <activiti:string><![CDATA[Booking Confirmation]]></activiti:string>
+        </activiti:field>
+        <activiti:field name="html">
+          <activiti:expression><![CDATA[Dear: ${patientUserId}<br/>
+
+Your booking has been confirmed for ${booking.requiredDate}.]]></activiti:expression>
+        </activiti:field>
+        <activiti:field name="from">
+          <activiti:string><![CDATA[cleo@gmail.com]]></activiti:string>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <exclusiveGateway id="sid-7CFAED37-B80E-4EAD-8363-F811A3074451"></exclusiveGateway>
+    <userTask id="sid-3471D941-7561-4708-9F47-0BFC6E2CFCF7" name="Doctor Consultation" activiti:candidateGroups="doctors"></userTask>
+    <userTask id="sid-41C4775C-0F26-4E43-8566-D75C1356D644" name="Pharmacy Prescription" activiti:candidateGroups="pharmacists"></userTask>
+    <exclusiveGateway id="sid-4C97FED6-B8A1-4F99-9D8B-1F12660E56F2"></exclusiveGateway>
+    <sequenceFlow id="sid-270F941A-3A29-4688-B3FE-37E15B974F35" sourceRef="sid-3471D941-7561-4708-9F47-0BFC6E2CFCF7" targetRef="sid-4C97FED6-B8A1-4F99-9D8B-1F12660E56F2"></sequenceFlow>
+    <sequenceFlow id="sid-F34451D9-59C8-4F01-8DA3-FC08A42209B8" sourceRef="sid-E80531C6-EB8A-400B-AA00-C91E3A1D39BD" targetRef="sid-7CFAED37-B80E-4EAD-8363-F811A3074451"></sequenceFlow>
+    <sequenceFlow id="nurseToPharmacy" sourceRef="sid-7CFAED37-B80E-4EAD-8363-F811A3074451" targetRef="sid-41C4775C-0F26-4E43-8566-D75C1356D644">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${nurses.decision == "ReferToPharmacy"}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="nurseToDoctor" sourceRef="sid-7CFAED37-B80E-4EAD-8363-F811A3074451" targetRef="sid-3471D941-7561-4708-9F47-0BFC6E2CFCF7">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${nurses.decision == "ReferToDoctor"}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="nurseToComplete" sourceRef="sid-7CFAED37-B80E-4EAD-8363-F811A3074451" targetRef="sid-0119E07C-1FBA-448A-8DF6-1A9838A1B101">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${nurses.decision == "Completed"}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="doctorToPharmacy" sourceRef="sid-4C97FED6-B8A1-4F99-9D8B-1F12660E56F2" targetRef="sid-41C4775C-0F26-4E43-8566-D75C1356D644">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${doctors.decision == "ReferToPharmacy"}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="pharmacyToComplete" sourceRef="sid-41C4775C-0F26-4E43-8566-D75C1356D644" targetRef="sid-0119E07C-1FBA-448A-8DF6-1A9838A1B101"></sequenceFlow>
+    <endEvent id="sid-0119E07C-1FBA-448A-8DF6-1A9838A1B101"></endEvent>
+    <sequenceFlow id="doctorToHome" sourceRef="sid-4C97FED6-B8A1-4F99-9D8B-1F12660E56F2" targetRef="sid-0119E07C-1FBA-448A-8DF6-1A9838A1B101">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${doctors.decision == "Completed"}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="sid-32992714-FE35-44F9-8F5B-19A02782564D" sourceRef="inclusivegateway1" targetRef="sid-E80531C6-EB8A-400B-AA00-C91E3A1D39BD"></sequenceFlow>
+    <inclusiveGateway id="inclusivegateway1" name="Inclusive Gateway"></inclusiveGateway>
+    <sequenceFlow id="flow1" sourceRef="sid-1B0E1427-2B55-44FB-AFF1-9ACCC9719477" targetRef="inclusivegateway1"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_hospitalBookingProcess">
+    <bpmndi:BPMNPlane bpmnElement="hospitalBookingProcess" id="BPMNPlane_hospitalBookingProcess">
+      <bpmndi:BPMNShape bpmnElement="sid-1B0E1427-2B55-44FB-AFF1-9ACCC9719477" id="BPMNShape_sid-1B0E1427-2B55-44FB-AFF1-9ACCC9719477">
+        <omgdc:Bounds height="35.0" width="35.0" x="173.0" y="163.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-E80531C6-EB8A-400B-AA00-C91E3A1D39BD" id="BPMNShape_sid-E80531C6-EB8A-400B-AA00-C91E3A1D39BD">
+        <omgdc:Bounds height="80.0" width="100.0" x="450.0" y="140.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-C909F7B9-190A-4A68-949F-EA11481CD621" id="BPMNShape_sid-C909F7B9-190A-4A68-949F-EA11481CD621">
+        <omgdc:Bounds height="80.0" width="100.0" x="301.0" y="40.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-7CFAED37-B80E-4EAD-8363-F811A3074451" id="BPMNShape_sid-7CFAED37-B80E-4EAD-8363-F811A3074451">
+        <omgdc:Bounds height="40.0" width="40.0" x="645.0" y="160.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-3471D941-7561-4708-9F47-0BFC6E2CFCF7" id="BPMNShape_sid-3471D941-7561-4708-9F47-0BFC6E2CFCF7">
+        <omgdc:Bounds height="80.0" width="100.0" x="795.0" y="140.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-41C4775C-0F26-4E43-8566-D75C1356D644" id="BPMNShape_sid-41C4775C-0F26-4E43-8566-D75C1356D644">
+        <omgdc:Bounds height="80.0" width="100.0" x="615.0" y="260.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-4C97FED6-B8A1-4F99-9D8B-1F12660E56F2" id="BPMNShape_sid-4C97FED6-B8A1-4F99-9D8B-1F12660E56F2">
+        <omgdc:Bounds height="40.0" width="40.0" x="960.0" y="160.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="sid-0119E07C-1FBA-448A-8DF6-1A9838A1B101" id="BPMNShape_sid-0119E07C-1FBA-448A-8DF6-1A9838A1B101">
+        <omgdc:Bounds height="35.0" width="35.0" x="1110.0" y="162.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="inclusivegateway1" id="BPMNShape_inclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="330.0" y="160.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="sid-C5F17919-58CB-483C-B6C0-3A5B37109E55" id="BPMNEdge_sid-C5F17919-58CB-483C-B6C0-3A5B37109E55">
+        <omgdi:waypoint x="350.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="351.0" y="120.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-270F941A-3A29-4688-B3FE-37E15B974F35" id="BPMNEdge_sid-270F941A-3A29-4688-B3FE-37E15B974F35">
+        <omgdi:waypoint x="895.0" y="180.0"></omgdi:waypoint>
+        <omgdi:waypoint x="960.0" y="180.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-F34451D9-59C8-4F01-8DA3-FC08A42209B8" id="BPMNEdge_sid-F34451D9-59C8-4F01-8DA3-FC08A42209B8">
+        <omgdi:waypoint x="550.0" y="180.0"></omgdi:waypoint>
+        <omgdi:waypoint x="645.0" y="180.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="nurseToPharmacy" id="BPMNEdge_nurseToPharmacy">
+        <omgdi:waypoint x="665.0" y="200.0"></omgdi:waypoint>
+        <omgdi:waypoint x="665.0" y="260.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="nurseToDoctor" id="BPMNEdge_nurseToDoctor">
+        <omgdi:waypoint x="685.0" y="180.0"></omgdi:waypoint>
+        <omgdi:waypoint x="795.0" y="180.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="nurseToComplete" id="BPMNEdge_nurseToComplete">
+        <omgdi:waypoint x="665.0" y="160.0"></omgdi:waypoint>
+        <omgdi:waypoint x="664.0" y="13.0"></omgdi:waypoint>
+        <omgdi:waypoint x="923.0" y="13.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1127.0" y="13.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1127.0" y="162.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="doctorToPharmacy" id="BPMNEdge_doctorToPharmacy">
+        <omgdi:waypoint x="980.0" y="200.0"></omgdi:waypoint>
+        <omgdi:waypoint x="979.0" y="260.0"></omgdi:waypoint>
+        <omgdi:waypoint x="979.0" y="300.0"></omgdi:waypoint>
+        <omgdi:waypoint x="715.0" y="300.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="pharmacyToComplete" id="BPMNEdge_pharmacyToComplete">
+        <omgdi:waypoint x="665.0" y="340.0"></omgdi:waypoint>
+        <omgdi:waypoint x="665.0" y="386.0"></omgdi:waypoint>
+        <omgdi:waypoint x="934.0" y="383.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1088.0" y="385.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1127.0" y="385.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1127.0" y="340.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1127.0" y="197.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="doctorToHome" id="BPMNEdge_doctorToHome">
+        <omgdi:waypoint x="1000.0" y="180.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1110.0" y="179.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="sid-32992714-FE35-44F9-8F5B-19A02782564D" id="BPMNEdge_sid-32992714-FE35-44F9-8F5B-19A02782564D">
+        <omgdi:waypoint x="370.0" y="180.0"></omgdi:waypoint>
+        <omgdi:waypoint x="450.0" y="180.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="208.0" y="180.0"></omgdi:waypoint>
+        <omgdi:waypoint x="330.0" y="180.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
