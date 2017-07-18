@@ -17,25 +17,7 @@
         <activiti:formProperty id="nurseComments" name="Nurse Comments" type="string" required="true"></activiti:formProperty>
       </extensionElements>
     </userTask>
-    <sequenceFlow id="sid-C5F17919-58CB-483C-B6C0-3A5B37109E55" sourceRef="inclusivegateway1" targetRef="sid-C909F7B9-190A-4A68-949F-EA11481CD621"></sequenceFlow>
-    <serviceTask id="sid-C909F7B9-190A-4A68-949F-EA11481CD621" name="Booking Confirmation" activiti:type="mail">
-      <extensionElements>
-        <activiti:field name="to">
-          <activiti:expression><![CDATA[${booking.email}]]></activiti:expression>
-        </activiti:field>
-        <activiti:field name="subject">
-          <activiti:string><![CDATA[Booking Confirmation]]></activiti:string>
-        </activiti:field>
-        <activiti:field name="html">
-          <activiti:expression><![CDATA[Dear: ${patientUserId}<br/>
-
-Your booking has been confirmed for ${booking.requiredDate}.]]></activiti:expression>
-        </activiti:field>
-        <activiti:field name="from">
-          <activiti:string><![CDATA[cleo@gmail.com]]></activiti:string>
-        </activiti:field>
-      </extensionElements>
-    </serviceTask>
+    <sequenceFlow id="sid-C5F17919-58CB-483C-B6C0-3A5B37109E55" sourceRef="inclusivegateway1" targetRef="servicetask1"></sequenceFlow>
     <exclusiveGateway id="sid-7CFAED37-B80E-4EAD-8363-F811A3074451"></exclusiveGateway>
     <userTask id="sid-3471D941-7561-4708-9F47-0BFC6E2CFCF7" name="Doctor Consultation" activiti:candidateGroups="doctors"></userTask>
     <userTask id="sid-41C4775C-0F26-4E43-8566-D75C1356D644" name="Pharmacy Prescription" activiti:candidateGroups="pharmacists"></userTask>
@@ -62,6 +44,7 @@ Your booking has been confirmed for ${booking.requiredDate}.]]></activiti:expres
     <sequenceFlow id="sid-32992714-FE35-44F9-8F5B-19A02782564D" sourceRef="inclusivegateway1" targetRef="sid-E80531C6-EB8A-400B-AA00-C91E3A1D39BD"></sequenceFlow>
     <inclusiveGateway id="inclusivegateway1" name="Inclusive Gateway"></inclusiveGateway>
     <sequenceFlow id="flow1" sourceRef="sid-1B0E1427-2B55-44FB-AFF1-9ACCC9719477" targetRef="inclusivegateway1"></sequenceFlow>
+    <serviceTask id="servicetask1" name="Booking Confirmation" activiti:class="com.example.service.EmailServiceImp"></serviceTask>
   </process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_hospitalBookingProcess">
     <bpmndi:BPMNPlane bpmnElement="hospitalBookingProcess" id="BPMNPlane_hospitalBookingProcess">
@@ -70,9 +53,6 @@ Your booking has been confirmed for ${booking.requiredDate}.]]></activiti:expres
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="sid-E80531C6-EB8A-400B-AA00-C91E3A1D39BD" id="BPMNShape_sid-E80531C6-EB8A-400B-AA00-C91E3A1D39BD">
         <omgdc:Bounds height="80.0" width="100.0" x="450.0" y="140.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="sid-C909F7B9-190A-4A68-949F-EA11481CD621" id="BPMNShape_sid-C909F7B9-190A-4A68-949F-EA11481CD621">
-        <omgdc:Bounds height="80.0" width="100.0" x="301.0" y="40.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="sid-7CFAED37-B80E-4EAD-8363-F811A3074451" id="BPMNShape_sid-7CFAED37-B80E-4EAD-8363-F811A3074451">
         <omgdc:Bounds height="40.0" width="40.0" x="645.0" y="160.0"></omgdc:Bounds>
@@ -91,6 +71,9 @@ Your booking has been confirmed for ${booking.requiredDate}.]]></activiti:expres
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape bpmnElement="inclusivegateway1" id="BPMNShape_inclusivegateway1">
         <omgdc:Bounds height="40.0" width="40.0" x="330.0" y="160.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask1" id="BPMNShape_servicetask1">
+        <omgdc:Bounds height="80.0" width="100.0" x="301.0" y="40.0"></omgdc:Bounds>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge bpmnElement="sid-C5F17919-58CB-483C-B6C0-3A5B37109E55" id="BPMNEdge_sid-C5F17919-58CB-483C-B6C0-3A5B37109E55">
         <omgdi:waypoint x="350.0" y="160.0"></omgdi:waypoint>
